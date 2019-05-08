@@ -1,0 +1,14 @@
+{
+  "name": "tracks-crud",
+  "version": "1.0.0",
+  "description": "Crud simple a base de funciones AWS Lambda",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Andrés Salazar",
+  "license": "MIT",
+  "dependencies": {
+    "mysql": "^2.17.1"
+  }
+}
