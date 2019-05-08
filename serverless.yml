@@ -72,7 +72,7 @@ functions:
     events:
       - http:
           path: tracks/update
-          method: GET
+          method: POST
   delete:
     handler: Controllers/TracksController.delete
     events:
