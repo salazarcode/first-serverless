@@ -1,4 +1,3 @@
-'use strict';
 var mysql = require('mysql')
 var connection = mysql.createConnection({
     "host"            : "mojoexternals.cpse5vpaifmp.us-east-2.rds.amazonaws.com",
