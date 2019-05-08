@@ -26,7 +26,7 @@ module.exports.create = function(event, context, callback){
 };
 
 module.exports.retrieve = function(event, context, callback){
-  return event
+  callback(null,{mensaje:"Hola mundo2"})
 };
 
 module.exports.update = function(event, context, callback){
