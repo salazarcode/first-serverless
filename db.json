@@ -1,0 +1,6 @@
+{
+    "host"            : "mojodesa.cpse5vpaifmp.us-east-2.rds.amazonaws.com",    
+    "user"            : "mojodev",
+    "password"        : "mojo1234",
+    "database"        : "mojodev"
+}

@@ -1,16 +1,23 @@
 var mysql = require('mysql')
+var db = require('../db.json')
+
 var connection = mysql.createConnection({
-    "host"            : "mojodesa.cpse5vpaifmp.us-east-2.rds.amazonaws.com",    
-    "user"            : "mojodev",
-    "password"        : "mojo1234",
-    "database"        : "mojodev"
+  "host"            : db.host,    
+  "user"            : db.user,
+  "password"        : db.password,
+  "database"        : db.database
 });
 
 module.exports.create = function(event, context, callback){
-  context.callbackWaitsForEmptyEventLoop = false;
-  
+  context.callbackWaitsForEmptyEventLoop = false;  
   var nombreInput =  event.queryStringParameters && event.queryStringParameters.nombre ? event.queryStringParameters.nombre : false;
-
+  if(!(nombreInput))
+  {
+    callback(null, { 
+      statusCode: 200,  
+      body: JSON.stringify({ validation: "You must provide the track name to create it" }) 
+    })
+  }
   connection.query('insert into track set ?', {nombre: nombreInput}, function (error, results, fields) {
     if (error) {
       callback({
@@ -71,7 +78,7 @@ module.exports.retrieve = function(event, context, callback){
 module.exports.update = function(event, context, callback){  
   context.callbackWaitsForEmptyEventLoop = false;
   var nombre = event.queryStringParameters && event.query
-  /*StringParameters.nombre ? event.queryStringParameters.nombre : false;
+  StringParameters.nombre ? event.queryStringParameters.nombre : false;
   var isrc = event.queryStringParameters && event.queryStringParameters.isrc ? event.queryStringParameters.isrc : false;
   var isrcVideos = event.queryStringParameters && event.queryStringParameters.isrcVideos ? event.queryStringParameters.isrcVideos : false;
   var idAlbum = event.queryStringParameters && event.queryStringParameters.idAlbum ? event.queryStringParameters.idAlbum : false;
@@ -79,18 +86,7 @@ module.exports.update = function(event, context, callback){
   var idSpotify = event.queryStringParameters && event.queryStringParameters.idSpotify ? event.queryStringParameters.idSpotify : false;
   var idDeezer = event.queryStringParameters && event.queryStringParameters.idDeezer ? event.queryStringParameters.idDeezer : false;
   var idAppleMusic = event.queryStringParameters && event.queryStringParameters.idAppleMusic ? event.queryStringParameters.idAppleMusic : false;
-  var id = event.queryStringParameters && event.queryStringParameters.id ? event.queryStringParameters.id : false;*/
-
-  
-  var nombre = 'SantiagoSongEditada';
-  var isrc = 'RTHTRH453245564';
-  var isrcVideos = 'KJHKHJKG53245564';
-  var idAlbum = 9;
-  var idVideo = 9;
-  var idSpotify = 9;
-  var idDeezer = 9;
-  var idAppleMusic = 9;
-  var id = 1500;
+  var id = event.queryStringParameters && event.queryStringParameters.id ? event.queryStringParameters.id : false;
    
   if(!(id && nombre && isrc && isrcVideos && idAlbum && idVideo && idSpotify && idDeezer && idAppleMusic))
   {
@@ -121,6 +117,13 @@ module.exports.update = function(event, context, callback){
 
 module.exports.delete = function(event, context, callback){  
   context.callbackWaitsForEmptyEventLoop = false;
+  if(!(event.queryStringParameters.id))
+  {
+    callback(null, { 
+      statusCode: 200,  
+      body: JSON.stringify({ validation: "You must provide the 'id' of the row to be deleted" }) 
+    })
+  }
   const sql = 'delete from track where id = ?';
   connection.query(sql, [event.queryStringParameters.id], (error, result) => {
     if (error) {
