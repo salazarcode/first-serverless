@@ -60,7 +60,7 @@ functions:
     events:
       - http:
           path: tracks/create
-          method: POST
+          method: GET
   retrieve:
     handler: Controllers/TracksController.retrieve
     events:
@@ -72,7 +72,7 @@ functions:
     events:
       - http:
           path: tracks/update
-          method: POST
+          method: GET
   delete:
     handler: Controllers/TracksController.delete
     events:
