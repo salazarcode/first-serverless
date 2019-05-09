@@ -44,34 +44,57 @@ module.exports.retrieve = function(event, context, callback){
   var idArtista = event.queryStringParameters && event.queryStringParameters.idArtista ? event.queryStringParameters.idArtista : false; 
   
   var perpage = event.queryStringParameters && event.queryStringParameters.perpage ? event.queryStringParameters.perpage : false;
-  var lastrecord = event.queryStringParameters && event.queryStringParameters.lastrecord ? event.queryStringParameters.lastrecord : false; 
+  var page = event.queryStringParameters && event.queryStringParameters.page ? event.queryStringParameters.page : false; 
+  
+  var totalRows = 0;
+ 
+  if(!(perpage && page))
+  {
+    callback(null, { 
+      statusCode: 200,  
+      body: JSON.stringify({ validation: "You must specify a 'page' and a 'perpage' argument" })
+    })
+  }
 
-  var query = "select a.id as idArtista, t.*";
+  var subquery = "select count(*)";
+  subquery = subquery + "from track t ";
+  subquery = subquery + "left outer join trackxartista ta on t.id = ta.idTrack ";
+  subquery = subquery + "left outer join artistas a on ta.idArtista = a.id where 1=1 ";
+  subquery = subquery + (nombre ? "and nombre like '%" + nombre + "%' " : "");
+  subquery = subquery + (isrc ? "and isrc = '%" + isrc + "%' " : "");
+  subquery = subquery + (idAlbum ? "and idAlbum = " + idAlbum + " " : "");
+  subquery = subquery + (idArtista ? "and idArtista = " + idArtista + " " : "");
+
+  var query = "select a.id as idArtista, t.*, ("+ subquery +") as total ";
   query = query + "from track t ";
-  query = query + "inner join trackxartista ta on t.id = ta.idTrack ";
-  query = query + "inner join artistas a on ta.idArtista = a.id where 1=1 ";
-
+  query = query + "left outer join trackxartista ta on t.id = ta.idTrack ";
+  query = query + "left outer join artistas a on ta.idArtista = a.id where 1=1 ";
   query = query + (nombre ? "and nombre like '%" + nombre + "%' " : "");
   query = query + (isrc ? "and isrc = '%" + isrc + "%' " : "");
   query = query + (idAlbum ? "and idAlbum = " + idAlbum + " " : "");
   query = query + (idArtista ? "and idArtista = " + idArtista + " " : "");
-  if(perpage)
-  {
-    if(lastrecord)
+  query = query + " limit " + (page - 1) + ", " + perpage;
+
+  connection.query(query, (error, rows) => {
+    if(error)
     {
-      query = query + " limit " + lastrecord + ", " + perpage;
+      callback({ statusCode: 500,  body: JSON.stringify({ error: error }) });
     }
     else
     {
-      query = query + " limit " + perpage;
-    }    
-  }
-
-  connection.query(query, (error, rows) => {
-      callback(
-        error ? { statusCode: 500,  body: JSON.stringify({ error: error }) } : null, 
-        !error ? { statusCode: 200,  body: JSON.stringify({ data: rows }) } : null
-      ) 
+      callback(null, { 
+        statusCode: 200,  
+        body: JSON.stringify({ 
+          data: rows, 
+          pagination: {
+              records_per_page: perpage,
+              current_page: page,
+              total_pages: Math.ceil(rows[0].total / perpage),
+              totalRows: rows[0].total
+          } 
+        }) 
+      })
+    }
   })    
 };
 
