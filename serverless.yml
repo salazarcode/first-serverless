@@ -67,6 +67,12 @@ functions:
       - http:
           path: tracks/retrieve
           method: GET
+  detail:
+    handler: Controllers/TracksController.detail
+    events:
+      - http:
+          path: tracks/{id}
+          method: GET
   update:
     handler: Controllers/TracksController.update
     events:
@@ -79,7 +85,12 @@ functions:
       - http:
           path: tracks/delete
           method: GET
-
+  detailAlbum:
+    handler: Controllers/AlbumsController.detail
+    events:
+      - http:
+          path: albums/{id}
+          method: GET
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
