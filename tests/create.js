@@ -3,7 +3,7 @@ var rutas = require('./rutas.json')
 
 axios.get(rutas.create,{
   params: {
-    nombre: "Una última prueba"
+    nombre: "Canta tú"
   }
 })
 .then(function (response) {

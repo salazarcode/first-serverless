@@ -21,7 +21,7 @@ module.exports.create = function(event, context, callback){
       body: JSON.stringify({ validation: "You must provide the track name to create it" }) 
     })
   
-  var q = "insert into track(isrc, isrcVideos, idAlbum, idVideo, idSpotify, idDeezer, idAppleMusic, nombre) values('', '', null, null, null, null, null, " + nombre + ")";
+  var q = "insert into track(isrc, isrcVideos, idAlbum, idVideo, idSpotify, idDeezer, idAppleMusic, nombre) values('', '', null, null, null, null, null, '" + nombre + "')";
 
   connection.query(q, function (error, results, fields) {
     if (error) throw error;
