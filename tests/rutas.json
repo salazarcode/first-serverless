@@ -1,0 +1,8 @@
+{
+    "create": "https://jv8f8j8y2l.execute-api.us-east-1.amazonaws.com/dev/tracks/create",
+    "retrieve": "https://jv8f8j8y2l.execute-api.us-east-1.amazonaws.com/dev/tracks/retrieve",
+    "detail": "https://jv8f8j8y2l.execute-api.us-east-1.amazonaws.com/dev/tracks/",
+    "delete": "https://jv8f8j8y2l.execute-api.us-east-1.amazonaws.com/dev/tracks/delete2",
+    "update": "https://jv8f8j8y2l.execute-api.us-east-1.amazonaws.com/dev/tracks/update",
+    "albumDetail": "https://jv8f8j8y2l.execute-api.us-east-1.amazonaws.com/dev/albums/"
+}

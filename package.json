@@ -9,6 +9,7 @@
   "author": "Andrés Salazar",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.18.0",
     "mysql": "^2.17.1",
     "util": "^0.12.0"
   }
