@@ -1,9 +1,7 @@
 var mysql = require('mysql')
 var Util = require('util')
 var db = require('../db.json')
-const Database = require('./DatabaseClass.js');
-
-
+const Database = require('../Database/DatabaseClass.js');
 
 var connection = mysql.createConnection({
   "host"            : db.host,    

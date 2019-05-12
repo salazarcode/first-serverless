@@ -1,5 +1,5 @@
 var mysql = require('mysql')
-var db = require('../db.json')
+var db = require('./db.json')
 class Database {
     constructor( config ) {
         this.connection = mysql.createConnection({

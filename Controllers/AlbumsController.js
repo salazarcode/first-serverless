@@ -1,6 +1,6 @@
 var mysql = require('mysql')
 var Util = require('util')
-var db = require('../db.json')
+var db = require('../Database/db.json')
 
 var connection = mysql.createConnection({
   "host"            : db.host,    
