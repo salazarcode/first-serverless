@@ -1,7 +1,7 @@
 const axios = require('axios');
 var rutas = require('./rutas.json')
 
-axios.get(rutas.detail + "1506",{
+axios.get(rutas.detail + "1515",{
 })
 .then(function (response) {
   console.log(response.data);

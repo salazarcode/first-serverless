@@ -12,26 +12,53 @@ var connection = mysql.createConnection({
   "database"        : db.database
 });
 
-module.exports.create = function(event, context, callback){
+async function getDetail(id){
+  let database = new Database();
+  let track, album, artista;
+
+  await database.query("select * from track where id = " + id)
+  .then( rows => track = rows[0] );
+
+  if(track.idAlbum != undefined)
+  {
+    await database.query("select * from albums where id = " + track.idAlbum)
+    .then( rows => track.album = rows );    
+  }
+  
+  await database.query("select a.* from track t inner join trackxartista ta on ta.idTrack = t.id inner join artistas a on a.id = ta.idArtista where t.id =" + track.id)
+  .then( rows => track.artista = rows );
+
+  return track;
+}
+
+module.exports.create = async function(event, context, callback){
   context.callbackWaitsForEmptyEventLoop = false;  
-  var nombre =  event.queryStringParameters && event.queryStringParameters.nombre ? event.queryStringParameters.nombre : false;
+  
+  const body = JSON.parse(event.body);
+
+  var nombre =  body.nombre ? body.nombre : false;
+
   if(!nombre)
     callback(null, { 
       statusCode: 200,  
       body: JSON.stringify({ validation: "You must provide the track name to create it" }) 
     })
   
-  var q = "insert into track(isrc, isrcVideos, idAlbum, idVideo, idSpotify, idDeezer, idAppleMusic, nombre) values('', '', null, null, null, null, null, '" + nombre + "')";
+  
+  let database = new Database();
+  let t;
 
-  connection.query(q, function (error, results, fields) {
-    if (error) throw error;
-    callback(null, {
-      statusCode: 200,
-      body: JSON.stringify({
-        inserted: results.insertId
-      })
-    })
-  });
+  var q = "insert into track(isrc, isrcVideos, idAlbum, idVideo, idSpotify, idDeezer, idAppleMusic, nombre) ";
+  q = q + "values('', '', null, null, null, null, null, '" + nombre + "')";
+
+  await database.query(q)
+  .then(rows => {return rows.insertId})
+  .then(async id => { t = await getDetail(id) })
+
+  callback(null, { 
+    statusCode: 200,  
+    body: JSON.stringify({ data: t }) 
+  })
 };
 
 module.exports.retrieve = function(event, context, callback){
@@ -111,7 +138,7 @@ module.exports.retrieve = function(event, context, callback){
   })    
 };
 
-module.exports.detail = function(event, context, callback){
+module.exports.detail = async function(event, context, callback){
   context.callbackWaitsForEmptyEventLoop = false;    
   var id = event.pathParameters.id; 
   if(!id)
@@ -122,44 +149,31 @@ module.exports.detail = function(event, context, callback){
     })
   }  
 
-  let track, album, artista;
-  let database = new Database();
-  database.query("select * from track where id = " + id)
-  .then( rows => {
-    track = rows[0];
-    return database.query("select * from albums where id = " + track.idAlbum);
-  })
-  .then( rows => {
-    album = rows;
-    return database.query("select al.* from track t inner join albums al on al.id = t.idAlbum where t.id = " + id);
-  })
-  .then( rows => {
-    track.album = album;
-    track.artista = rows;
-    database.close();
-    callback(null, {
-      statusCode: 200,
-      body: JSON.stringify({
-        data: track
-      })
-    })      
+  const track = await getDetail(id);
+
+  callback(null, { 
+    statusCode: 200,  
+    body: JSON.stringify({ data: track })
   })
 };
 
-module.exports.update = function(event, context, callback) {  
+module.exports.update =  async function(event, context, callback) {  
   context.callbackWaitsForEmptyEventLoop = false;
-  var id = event.queryStringParameters && event.queryStringParameters.id ? event.queryStringParameters.id : false;
-  var nombre = event.queryStringParameters && event.queryStringParameters.nombre ? event.queryStringParameters.nombre : false;
-  var isrc = event.queryStringParameters && event.queryStringParameters.isrc ? event.queryStringParameters.isrc : false;
-  var isrcVideos = event.queryStringParameters && event.queryStringParameters.isrcVideos ? event.queryStringParameters.isrcVideos : false;
-  var idAlbum = event.queryStringParameters && event.queryStringParameters.idAlbum ? event.queryStringParameters.idAlbum : false;
-  var idVideo = event.queryStringParameters && event.queryStringParameters.idVideo ? event.queryStringParameters.idVideo : false;
-  var idSpotify = event.queryStringParameters && event.queryStringParameters.idSpotify ? event.queryStringParameters.idSpotify : false;
-  var idDeezer = event.queryStringParameters && event.queryStringParameters.idDeezer ? event.queryStringParameters.idDeezer : false;
-  var idAppleMusic = event.queryStringParameters && event.queryStringParameters.idAppleMusic ? event.queryStringParameters.idAppleMusic : false;
 
+  const body = JSON.parse(event.body);
 
-  var track = event.queryStringParameters;
+  let track = {};
+
+  body.id             ? track.id = body.id          : false;
+  body.nombre         ? track.nombre = body.nombre      : false;
+  body.isrc           ? track.isrc = body.isrc        : false;
+  body.isrcVideos     ? track.isrcVideos = body.isrcVideos  : false;
+  body.idAlbum        ? track.idAlbum = body.idAlbum     : false;
+  body.idVideo        ? track.idVideo = body.idVideo     : false;
+  body.idSpotify      ? track.idSpotify = body.idSpotify   : false;
+  body.idDeezer       ? track.idDeezer = body.idDeezer    : false;
+  body.idAppleMusic   ? track.idAppleMusic = body.idAppleMusic: false;
+
   var permitidos = [ "nombre", "isrc", "isrcVideos", "idAlbum", "idVideo", "idSpotify", "idDeezer", "idAppleMusic" ];
   var sets = [];
   var keys = Object.keys(track);
@@ -175,15 +189,10 @@ module.exports.update = function(event, context, callback) {
   });
 
   const sql = "update track set " + cadena + " where id = "  + track.id;
-  connection.query(sql, (error, result) => {
+  await connection.query(sql, (error, result) => {
     if (error) throw error
-    callback(null, {
-      statusCode: 200,
-      body: JSON.stringify({
-        res: 'Updated'
-      })
-    })
   })
+  callback(null, {statusCode: 200});
 };
 
 module.exports.delete = function(event, context, callback){  
